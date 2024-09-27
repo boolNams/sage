@@ -1,5 +1,5 @@
 M, P, k, q1, q2, E, J = var('M P k q1 q2 E J')		# переменные заданные по условию
-omega0, teta0, R = var('omega0 teta0 R')			# переменные подлежащие определению
+omega0, teta0, R1, R2, R3, R4 = var('omega0 teta0 R1 R2 R3 R4')			# переменные подлежащие определению
 
 x = var('x')										# координата
 omega = function('omega')(x)						# прогиб балки
