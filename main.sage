@@ -5,10 +5,10 @@
 #================================================== ПРОГИБ
 M, P, k, qA, qB, E, J = var('M P k qA qB E J')							# переменные заданные по условию
 M = 1
-P = -2
+P = -3
 k = 3
-qA = -1
-qB = 3
+qA = -1/2
+qB = 1
 E = 100
 J = 100
 w0, wk, teta0, RA, RB, RC, RD = var('w0 wk teta0 R1 R2 R3 R4')			# переменные подлежащие определению
@@ -75,17 +75,21 @@ RA, RB, RC, RD = sol[RA], sol[RB], sol[RC], sol[RD]
 
 w = w(RA=RA, RB=RB, RC=RC, RD=RD, teta0=teta0, w0=w0, wk=wk)			# функция прогиба от x
 
+teta = w.diff(x)
+
+MM = teta.diff(x)
+
 #================================================== ГРАФИКА
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+'''
 N = 100                                                                 # количество точек на графике
 
 arg = np.linspace(0,25,N)												# построение прогиба
 val = np.zeros(N)
 for i in range(0,N):
-	val[i] = w(x = arg[i])
+	val[i] = teta(x = arg[i])
 plt.plot(arg, val)
 
 arg = np.array([AR, BR, CR, DR], dtype = float)							# построение опор
@@ -114,6 +118,58 @@ plt.fill_between(arg, val,color = 'g', alpha = 0.3)
 plt.grid()
 plt.legend()
 plt.xlim(0,25)
+plt.show()
+'''
+#================================================== ГРАФИКА (3 В 1)
+
+fig, axs = plt.subplots(3)
+
+axs[0].set_title("w")
+axs[1].set_title("teta")
+axs[2].set_title("MM")
+
+N = 100                                                                 # количество точек на графике
+
+arg = np.linspace(0,25,N)	
+val = np.zeros(N)
+for i in range(0,N):                                                                           # построение прогиба
+	val[i] = w(x = arg[i])
+axs[0].plot(arg, val)
+
+for i in range(0,N):                                                                           # построение углов
+	val[i] = teta(x = arg[i])
+axs[1].plot(arg, val)
+
+for i in range(0,N):                                                                           # построение моментов
+	val[i] = teta(x = arg[i])
+axs[2].plot(arg, val)
+
+for i in range(0,len(axs)):
+    arg = np.array([AR, BR, CR, DR], dtype = float)							                      # построение опор
+    val = np.zeros(4)
+    axs[i].plot(arg, val, 'ro', label = "R")
+
+    arg = np.array([AP], dtype = float)										# построение силы P
+    val = np.zeros(1)
+    axs[i].plot(arg,val, 'bo', label = "P")
+
+    arg = np.array([AM], dtype = float)										# построение момента M
+    val = np.zeros(1)
+    axs[i].plot(arg,val, 'mo', label = "M")
+
+    arg = np.array([Ak], dtype = float)										# построение пружины k
+    val = np.zeros(1)
+    axs[i].plot(arg,val, 'yo', label = "k")
+    
+    arg = np.array([Aq, Bq], dtype = float)									        # построение распределенной нагрузки
+    val = np.array([qA, qB], dtype = float)
+    axs[i].plot(arg,val, color = 'g', alpha = 0.3, label = "q")
+    axs[i].fill_between(arg, val,color = 'g', alpha = 0.3)
+    
+    axs[i].grid()
+    axs[i].legend()
+    axs[i].set_xlim(0,25)
+
 plt.show()
 
 #==================================================
