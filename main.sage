@@ -4,11 +4,11 @@
 #
 #================================================== ПРОГИБ
 M, P, k, qA, qB, E, J = var('M P k qA qB E J')							# переменные заданные по условию
-M = 1
-P = -3
-k = 3
-qA = -1/2
-qB = 1
+M = 15
+P = 10
+k = 2
+qA = -1/10
+qB = 1/10
 E = 100
 J = 100
 w0, wk, teta0, RA, RB, RC, RD = var('w0 wk teta0 R1 R2 R3 R4')			# переменные подлежащие определению
@@ -75,64 +75,29 @@ RA, RB, RC, RD = sol[RA], sol[RB], sol[RC], sol[RD]
 
 w = w(RA=RA, RB=RB, RC=RC, RD=RD, teta0=teta0, w0=w0, wk=wk)			# функция прогиба от x
 
-teta = w.diff(x)
+teta = w.diff(x)                                                        # функция угла от x
 
-MM = teta.diff(x)
+MM = teta.diff(x)                                                       # функция момента от x
+dots = [AR, BR, CR, DR, AM, AP, Aq, Bq, Ak]
+for dot in dots:
+    MM = MM.subs(diff(dirac_delta(x - dot),x) == 0)
 
 #================================================== ГРАФИКА
 
 import numpy as np
 import matplotlib.pyplot as plt
-'''
-N = 100                                                                 # количество точек на графике
-
-arg = np.linspace(0,25,N)												# построение прогиба
-val = np.zeros(N)
-for i in range(0,N):
-	val[i] = teta(x = arg[i])
-plt.plot(arg, val)
-
-arg = np.array([AR, BR, CR, DR], dtype = float)							# построение опор
-val = np.zeros(4)
-plt.plot(arg, val, 'ro', label = "R")
-
-arg = np.array([AP], dtype = float)										# построение силы P
-val = np.zeros(1)
-plt.plot(arg,val, 'bo', label = "P")
-
-arg = np.array([AM], dtype = float)										# построение момента M
-val = np.zeros(1)
-plt.plot(arg,val, 'mo', label = "M")
-
-arg = np.array([Ak], dtype = float)										# построение пружины k
-val = np.zeros(1)
-plt.plot(arg,val, 'yo', label = "k")
-
-arg = np.array([Aq, Bq], dtype = float)									# построение распределенной нагрузки
-val = np.array([qA, qB], dtype = float)
-plt.plot(arg,val, color = 'g', alpha = 0.3, label = "q")
-plt.fill_between(arg, val,color = 'g', alpha = 0.3)
-
-
-
-plt.grid()
-plt.legend()
-plt.xlim(0,25)
-plt.show()
-'''
-#================================================== ГРАФИКА (3 В 1)
 
 fig, axs = plt.subplots(3)
 
-axs[0].set_title("w")
-axs[1].set_title("teta")
-axs[2].set_title("MM")
+axs[0].set_title("Прогиб")
+axs[1].set_title("Угол")
+axs[2].set_title("Момент")
 
 N = 100                                                                 # количество точек на графике
 
 arg = np.linspace(0,25,N)	
 val = np.zeros(N)
-for i in range(0,N):                                                                           # построение прогиба
+for i in range(0,N):                                                    # построение прогиба
 	val[i] = w(x = arg[i])
 axs[0].plot(arg, val)
 
@@ -141,7 +106,7 @@ for i in range(0,N):                                                            
 axs[1].plot(arg, val)
 
 for i in range(0,N):                                                                           # построение моментов
-	val[i] = teta(x = arg[i])
+	val[i] = MM(x = arg[i])
 axs[2].plot(arg, val)
 
 for i in range(0,len(axs)):
