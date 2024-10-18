@@ -4,13 +4,13 @@
 #
 #================================================== ПРОГИБ
 M, P, k, qA, qB, E, J = var('M P k qA qB E J')							# переменные заданные по условию
-M = 15
+M = 10
 P = 10
 k = 2
-qA = -1/10
-qB = 1/10
-E = 100
-J = 100
+qA = -1
+qB = 4
+E = 10
+J = 10
 w0, wk, teta0, RA, RB, RC, RD = var('w0 wk teta0 R1 R2 R3 R4')			# переменные подлежащие определению
 
 x = var('x')															# координата (0,25)     
@@ -73,41 +73,53 @@ sol = solve(eq, w0, wk, teta0, RA, RB, RC, RD, solution_dict = True)[0]
 w0, wk, teta0 = sol[w0], sol[wk], sol[teta0]
 RA, RB, RC, RD = sol[RA], sol[RB], sol[RC], sol[RD]
 
+dots = [AR, BR, CR, DR, AM, AP, Aq, Bq, Ak]
+
 w = w(RA=RA, RB=RB, RC=RC, RD=RD, teta0=teta0, w0=w0, wk=wk)			# функция прогиба от x
 
 teta = w.diff(x)                                                        # функция угла от x
-
-MM = teta.diff(x)                                                       # функция момента от x
-dots = [AR, BR, CR, DR, AM, AP, Aq, Bq, Ak]
 for dot in dots:
-    MM = MM.subs(diff(dirac_delta(x - dot),x) == 0)
+    teta = teta.subs(dirac_delta(x - dot) == 0)
+
+MM = teta.diff(x)                                                 # функция момента от x
+for dot in dots:
+    MM = MM.subs(dirac_delta(x - dot) == 0)
+    
+Q = MM.diff(x)
+for dot in dots:
+    Q = Q.subs(dirac_delta(x - dot) == 0)
 
 #================================================== ГРАФИКА
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-fig, axs = plt.subplots(3)
+fig, axs = plt.subplots(4)
 
-axs[0].set_title("Прогиб")
+axs[0].set_title("Момент")
 axs[1].set_title("Угол")
-axs[2].set_title("Момент")
+axs[2].set_title("Прогиб")
+axs[3].set_title("Сила")
 
 N = 100                                                                 # количество точек на графике
 
 arg = np.linspace(0,25,N)	
 val = np.zeros(N)
-for i in range(0,N):                                                    # построение прогиба
-	val[i] = w(x = arg[i])
+for i in range(0,N):                                                    # построение моментов
+	val[i] = MM(x = arg[i])
 axs[0].plot(arg, val)
 
 for i in range(0,N):                                                                           # построение углов
 	val[i] = teta(x = arg[i])
 axs[1].plot(arg, val)
 
-for i in range(0,N):                                                                           # построение моментов
-	val[i] = MM(x = arg[i])
+for i in range(0,N):                                                                           # построение прогиба
+	val[i] = w(x = arg[i])
 axs[2].plot(arg, val)
+
+for i in range(0,N):                                                                           # построение силы
+	val[i] = Q(x = arg[i])
+axs[3].plot(arg, val)
 
 for i in range(0,len(axs)):
     arg = np.array([AR, BR, CR, DR], dtype = float)							                      # построение опор
