@@ -4,11 +4,11 @@
 #
 #================================================== ПРОГИБ
 M, P, k, qA, qB, E, J = var('M P k qA qB E J')							# переменные заданные по условию
-M = 10
-P = 10
-k = 2
-qA = -1
-qB = 4
+M = -1
+P = 0.25
+k = 3
+qA = -0.1
+qB = 0.1
 E = 10
 J = 10
 w0, wk, teta0, RA, RB, RC, RD = var('w0 wk teta0 R1 R2 R3 R4')			# переменные подлежащие определению
@@ -81,10 +81,10 @@ teta = w.diff(x)                                                        # фун
 for dot in dots:
     teta = teta.subs(dirac_delta(x - dot) == 0)
 
-MM = teta.diff(x)                                                 # функция момента от x
+MM = teta.diff(x)                                                       # функция момента от x
 for dot in dots:
     MM = MM.subs(dirac_delta(x - dot) == 0)
-    
+
 Q = MM.diff(x)
 for dot in dots:
     Q = Q.subs(dirac_delta(x - dot) == 0)
@@ -96,33 +96,35 @@ import matplotlib.pyplot as plt
 
 fig, axs = plt.subplots(4)
 
-axs[0].set_title("Момент")
-axs[1].set_title("Угол")
-axs[2].set_title("Прогиб")
-axs[3].set_title("Сила")
+axs[0].set_title("Сила")
+axs[1].set_title("Момент")
+axs[2].set_title("Угол")
+axs[3].set_title("Прогиб")
 
-N = 100                                                                 # количество точек на графике
+N = 500                                                                 # количество точек на графике
+width = 2                                                               # толщина графика
 
 arg = np.linspace(0,25,N)	
 val = np.zeros(N)
+
+for i in range(0,N):                                                    # построение силы
+    val[i] = Q(x = arg[i]).subs(heaviside(0.0) == 0)
+axs[0].plot(arg, val, linewidth = width)
+
 for i in range(0,N):                                                    # построение моментов
-	val[i] = MM(x = arg[i])
-axs[0].plot(arg, val)
+	val[i] = MM(x = arg[i]).subs(heaviside(0.0) == 0)
+axs[1].plot(arg, val, linewidth = width)
 
-for i in range(0,N):                                                                           # построение углов
-	val[i] = teta(x = arg[i])
-axs[1].plot(arg, val)
+for i in range(0,N):                                                    # построение углов
+	val[i] = teta(x = arg[i]).subs(heaviside(0.0) == 0)
+axs[2].plot(arg, val, linewidth = width)
 
-for i in range(0,N):                                                                           # построение прогиба
-	val[i] = w(x = arg[i])
-axs[2].plot(arg, val)
-
-for i in range(0,N):                                                                           # построение силы
-	val[i] = Q(x = arg[i])
-axs[3].plot(arg, val)
+for i in range(0,N):                                                    # построение прогиба
+	val[i] = w(x = arg[i]).subs(heaviside(0.0) == 0)
+axs[3].plot(arg, val, linewidth = width)
 
 for i in range(0,len(axs)):
-    arg = np.array([AR, BR, CR, DR], dtype = float)							                      # построение опор
+    arg = np.array([AR, BR, CR, DR], dtype = float)							# построение опор
     val = np.zeros(4)
     axs[i].plot(arg, val, 'ro', label = "R")
 
